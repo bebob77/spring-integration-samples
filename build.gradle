@@ -1,3 +1,16 @@
+buildscript {
+	repositories {
+		maven { url 'http://repo.spring.io/libs-snapshot' }
+		maven { url "http://repo.spring.io/libs-milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+	}
+}
+plugins {
+	id "org.sonarqube" version "1.2"
+}
+
 description = 'Spring Integration Samples'
 
 apply plugin: 'base'
@@ -12,21 +25,10 @@ ext {
 	linkScmDevConnection = 'scm:git:ssh://git@github.com:spring-projects/spring-integration-samples.git'
 }
 
-buildscript {
-	repositories {
-		maven { url 'http://repo.spring.io/libs-snapshot' }
-		maven { url "http://repo.spring.io/libs-milestone" }
-	}
-	dependencies {
-		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
-	}
-}
-
 allprojects {
 	group = 'org.springframework.integration.samples'
 
 	repositories {
-//			mavenLocal()
 		maven { url 'http://repo.spring.io/libs-snapshot' }
 		maven { url 'http://repo.spring.io/libs-milestone' }
 //			maven { url 'http://repo.spring.io/libs-staging-local' }
@@ -162,8 +164,9 @@ subprojects { subproject ->
 			commonsPoolVersion = '1.5.4'
 			c3p0Version = '0.9.1.2'
 			derbyVersion = '10.10.1.1'
+			eclipseLinkVersion = '2.4.2'
 			hamcrestVersion = '1.3'
-			hibernateVersion = '4.2.11.Final'
+			hibernateVersion = '5.0.9.Final'
 			hibernateValidatorVersion = '4.2.0.Final'
 			ftpServerVersion = '1.0.6'
 			flexjsonVersion = '2.0'
@@ -174,28 +177,31 @@ subprojects { subproject ->
 			jacksonVersion = '2.3.2'
 			jasyptVersion = '1.7'
 			javaxInjectVersion = '1'
-			javaxMailVersion = '1.5.2'
+			javaxMailVersion = '1.5.5'
 			jodaTimeVersion = '1.6'
 			jtaVersion = '1.1'
 			jtdsVersion = '1.2.6'
 			jmsApiVersion = '1.1-rev-1'
 			jrubyVersion = '1.7.12'
+			jpa21ApiVersion = '1.0.0.Final'
 			jpaApiVersion = '2.0.0'
 			jstlVersion = '1.2'
-			junitVersion = '4.11'
+			junitVersion = '4.12'
 			jythonVersion = '2.5.3'
 			log4jVersion = '1.2.17'
-			mockitoVersion = '1.9.5'
-			openJpaVersion = '2.3.0'
+			mockitoVersion = '1.10.19'
+			openJpaVersion = '2.4.0'
 			oracleDriverVersion = '11.2.0.3'
-			reactorVersion = '2.0.7.RELEASE'
+			reactorVersion = '2.0.8.RELEASE'
 			postgresVersion = '9.1-901-1.jdbc4'
 			subethasmtpVersion = '1.2'
 			slf4jVersion = '1.7.11'
-			springIntegrationVersion = '4.2.2.RELEASE'
-			springIntegrationDslVersion = '1.1.1.RELEASE'
-			springIntegrationKafkaVersion = '1.3.0.RELEASE'
-			springVersion = '4.2.3.RELEASE'
+			springIntegrationVersion = '4.3.4.RELEASE'
+			springIntegrationDslVersion = '1.2.0.RELEASE'
+			springIntegrationKafkaVersion = '2.1.0.RELEASE'
+			springIntegrationSplunkVersion = '1.1.0.RELEASE'
+			springKafkaVersion = '1.1.0.RELEASE'
+			springVersion = '4.3.2.RELEASE'
 			springSecurityVersion = '4.0.2.RELEASE'
 			springWebFlowVersion = '2.3.3.RELEASE'
 			tilesJspVersion = '2.2.1'
@@ -390,8 +396,6 @@ project('loanshark') {
 		compile "org.springframework:spring-context:$springVersion"
 		compile "commons-fileupload:commons-fileupload:$commonsFileUploadVersion"
 		compile "commons-dbcp:commons-dbcp:$commonsDbcpVersion"
-		compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
-		compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
 		compile "commons-digester:commons-digester:$commonsDigesterVersion"
 		compile "commons-pool:commons-pool:$commonsPoolVersion"
 		compile "org.apache.tiles:tiles-jsp:$tilesJspVersion"
@@ -404,7 +408,11 @@ project('loanshark') {
 		compile "org.eclipse.persistence:javax.persistence:$jpaApiVersion"
 		compile "org.hibernate:hibernate-entitymanager:$hibernateVersion"
 		compile "org.springframework.webflow:spring-js:$springWebFlowVersion"
-		compile "log4j:log4j:$log4jVersion"
+		compile "org.slf4j:slf4j-api:$slf4jVersion"
+
+		runtime "log4j:log4j:$log4jVersion"
+		runtime "org.slf4j:slf4j-log4j12:$slf4jVersion"
+		runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
 	}
 
 }
@@ -512,9 +520,11 @@ project('ftp') {
 		compile "org.springframework.integration:spring-integration-ftp:$springIntegrationVersion"
 		compile "commons-io:commons-io:$commonsIoVersion"
 		compile "org.apache.ftpserver:ftpserver-core:$ftpServerVersion"
-		compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
-		compile "log4j:log4j:$log4jVersion"
+		compile "org.slf4j:slf4j-api:$slf4jVersion"
 
+		runtime "org.slf4j:slf4j-log4j12:$slf4jVersion"
+
+		testCompile "log4j:log4j:$log4jVersion"
 		testCompile "org.springframework.integration:spring-integration-test:$springIntegrationVersion"
 	}
 
@@ -559,9 +569,32 @@ project('http') {
 		compile "commons-fileupload:commons-fileupload:$commonsFileUploadVersion"
 		compile "commons-io:commons-io:$commonsIoVersion"
 		compile "javax.mail:javax.mail-api:$javaxMailVersion"
+		compile "com.sun.mail:javax.mail:$javaxMailVersion"
 		compile "log4j:log4j:$log4jVersion"
 	}
 
+}
+
+project('splunk') {
+	description = 'Splunk Sample'
+
+	apply plugin: 'spring-boot'
+
+	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-integration'
+		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-splunk:$springIntegrationSplunkVersion"
+		testCompile 'org.springframework.boot:spring-boot-starter-test'
+	}
+
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.splunk.Application'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.splunk.Application'
+		classpath = sourceSets.main.runtimeClasspath
+	}
 }
 
 project('kafka') {
@@ -571,10 +604,16 @@ project('kafka') {
 
 	dependencies {
 		compile 'org.springframework.boot:spring-boot-starter-integration'
-		compile("org.springframework.integration:spring-integration-kafka:$springIntegrationKafkaVersion") {
+		compile ("org.springframework.integration:spring-integration-kafka:$springIntegrationKafkaVersion") {
 			exclude group: 'org.slf4j'
 		}
 		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
+		compile "org.springframework.kafka:spring-kafka:$springKafkaVersion"
+		compile ("org.springframework.kafka:spring-kafka-test:$springKafkaVersion") {
+			exclude group: 'org.slf4j'
+		}
+
+		compile "log4j:log4j:$log4jVersion"
 
 		testCompile 'org.springframework.boot:spring-boot-starter-test'
 	}
@@ -588,6 +627,36 @@ project('kafka') {
 		classpath = sourceSets.main.runtimeClasspath
 	}
 }
+
+project('mqtt') {
+	description = 'MQTT Basic Sample'
+
+	apply plugin: 'spring-boot'
+
+	sourceCompatibility = 1.8
+
+	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-integration'
+		compile "org.springframework.integration:spring-integration-stream:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-mqtt:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
+	}
+
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.mqtt.Application'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.mqtt.Application'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+
+	tasks.withType(JavaExec) {
+		standardInput = System.in
+	}
+
+}
+
 project('si4demo') {
 	description = 'Java Configuration/DSL Sample'
 
@@ -600,12 +669,11 @@ project('si4demo') {
 		compile 'org.springframework.boot:spring-boot-starter-integration'
 		compile "org.springframework.integration:spring-integration-mail"
 		compile "org.springframework.integration:spring-integration-twitter"
+		compile "org.springframework.integration:spring-integration-http"
+		compile "org.springframework.integration:spring-integration-ip"
 		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
 		compile "javax.mail:javax.mail-api:$javaxMailVersion"
 		compile "com.sun.mail:javax.mail:$javaxMailVersion"
-		compile "com.sun.mail:smtp:$javaxMailVersion"
-		compile "com.sun.mail:pop3:$javaxMailVersion"
-		compile "com.sun.mail:imap:$javaxMailVersion"
 		compile "com.rometools:rome:1.5.0"
 
 		testCompile 'org.springframework.boot:spring-boot-starter-test'
@@ -633,13 +701,20 @@ project('cafe-dsl') {
 		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
 		compile "com.google.guava:guava:$guavaVersion"
 		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
-		compile "io.projectreactor:reactor-stream:$reactorVersion"
-		compile "io.projectreactor.spring:reactor-spring-context:$reactorVersion"
 
 		testCompile 'org.springframework.boot:spring-boot-starter-test'
 	}
 	springBoot {
 		mainClass = 'org.springframework.integration.samples.dsl.cafe.lambda.Application'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.dsl.cafe.nonlambda.Application'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+
+	tasks.withType(JavaExec) {
+		standardInput = System.in
 	}
 }
 
@@ -668,7 +743,6 @@ project('jms') {
 	dependencies {
 		compile "org.springframework.integration:spring-integration-jms:$springIntegrationVersion"
 		compile "org.springframework.integration:spring-integration-stream:$springIntegrationVersion"
-		compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
 		compile "org.apache.activemq:activemq-broker:$activeMqVersion"
 		compile("org.apache.activemq:activemq-kahadb-store:$activeMqVersion") {
 			exclude group: "org.springframework"
@@ -693,31 +767,36 @@ project('jpa') {
 	description = 'JPA Basic Sample'
 
 	apply plugin: 'application'
+	apply plugin: 'spring-boot'
 
 	mainClassName = 'org.springframework.integration.samples.jpa.Main'
 
 	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-data-jpa'
 		compile "org.springframework.integration:spring-integration-jpa:$springIntegrationVersion"
 		compile "com.h2database:h2:$h2Version"
-		compile "org.hibernate:hibernate-entitymanager:$hibernateVersion"
-		compile "org.eclipse.persistence:javax.persistence:$jpaApiVersion"
-		compile "commons-lang:commons-lang:$commonsLangVersion"
-		compile "log4j:log4j:$log4jVersion"
+		compile "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:$jpa21ApiVersion"
 
 		runtime "org.springframework:spring-instrument:$springVersion"
 		runtime "org.apache.openjpa:openjpa:$openJpaVersion"
+		runtime "org.hibernate:hibernate-entitymanager:$hibernateVersion"
+		runtime "org.eclipse.persistence:org.eclipse.persistence.jpa:$eclipseLinkVersion"
 
+		testCompile 'org.springframework.boot:spring-boot-starter-test'
 	}
 
 	//Suppress openjpa annotation processor warnings
 	compileTestJava.options.compilerArgs = ["${xLintArg},-processing"]
 
-	run {
-		def javaAgents = configurations.testRuntime.resolvedConfiguration.resolvedArtifacts
-				.findAll { it.name in ['spring-instrument', 'openjpa'] }
-				.collect { "-javaagent:${it.file}" }
-		jvmArgs javaAgents
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.jpa.Main'
 	}
+
+	tasks.withType(JavaExec) {
+		standardInput = System.in
+		jvmArgs classpath.files.findAll{it.name ==~ /(spring-instrument.+)|(openjpa-${openJpaVersion}.+)/}.collect{"-javaagent:$it"}
+	}
+
 }
 
 project('mail') {
@@ -727,14 +806,13 @@ project('mail') {
 		compile "org.springframework.integration:spring-integration-mail:$springIntegrationVersion"
 		compile "org.springframework:spring-context:$springVersion"
 		compile "javax.mail:javax.mail-api:$javaxMailVersion"
-		compile "com.sun.mail:mailapi:$javaxMailVersion"
+		compile "com.sun.mail:javax.mail:$javaxMailVersion"
 		compile "log4j:log4j:$log4jVersion"
 	}
 
 	task runGmailInboundPop3AdapterTestApp(type: JavaExec) {
 		main 'org.springframework.integration.samples.mail.imapidle.GmailInboundPop3AdapterTestApp'
 		classpath = sourceSets.main.runtimeClasspath
-
 	}
 
 	task runGmailInboundImapIdleAdapterTestApp(type: JavaExec) {
@@ -810,8 +888,10 @@ project('tcp-amqp') {
 	dependencies {
 		compile "org.springframework.integration:spring-integration-amqp:$springIntegrationVersion"
 		compile "org.springframework.integration:spring-integration-ip:$springIntegrationVersion"
-		compile "org.slf4j:slf4j-log4j12:$slf4jVersion"
-		compile "log4j:log4j:$log4jVersion"
+		compile "org.slf4j:slf4j-api:$slf4jVersion"
+
+		runtime "log4j:log4j:$log4jVersion"
+		runtime "org.slf4j:slf4j-log4j12:$slf4jVersion"
 	}
 }
 
@@ -928,7 +1008,6 @@ project('async-gateway') {
 	dependencies {
 		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
 		compile "io.projectreactor:reactor-stream:$reactorVersion"
-		compile "io.projectreactor.spring:reactor-spring-context:$reactorVersion"
 		compile "log4j:log4j:$log4jVersion"
 	}
 }
@@ -975,8 +1054,8 @@ project('mail-attachments') {
 		compile "org.springframework.integration:spring-integration-mail:$springIntegrationVersion"
 		compile "org.springframework.integration:spring-integration-file:$springIntegrationVersion"
 		compile "javax.mail:javax.mail-api:$javaxMailVersion"
+		compile "com.sun.mail:javax.mail:$javaxMailVersion"
 		compile "commons-io:commons-io:$commonsIoVersion"
-		compile "com.sun.mail:mailapi:$javaxMailVersion"
 		compile "log4j:log4j:$log4jVersion"
 
 		testCompile "org.springframework.integration:spring-integration-test:$springIntegrationVersion"
@@ -1260,10 +1339,94 @@ project('stomp-chat') {
 	}
 }
 
-apply plugin: 'sonar-runner'
+project('kafka-dsl') {
+	description = 'Java DSL Kafka Sample'
 
-sonarRunner {
-	sonarProperties {
+	apply plugin: 'spring-boot'
+
+	sourceCompatibility = 1.8
+
+	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-integration'
+		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
+		compile ("org.springframework.integration:spring-integration-kafka:$springIntegrationKafkaVersion")
+		compile ("org.springframework.kafka:spring-kafka-test:$springKafkaVersion") {
+			exclude group: 'org.slf4j'
+		}
+		compile "log4j:log4j:$log4jVersion"
+		testCompile 'org.springframework.boot:spring-boot-starter-test'
+	}
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.dsl.kafka.Application'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.dsl.kafka.Application'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+
+	tasks.withType(JavaExec) {
+		standardInput = System.in
+	}
+}
+
+project('file-split-ftp') {
+	description = 'File Split FTP'
+
+	apply plugin: 'spring-boot'
+
+	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-web'
+		compile 'org.springframework.boot:spring-boot-starter-integration'
+		compile "org.springframework.integration:spring-integration-core:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-ftp:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-http:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-mail:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
+		compile "org.springframework.integration:spring-integration-test:5.0.0.BUILD-SNAPSHOT" // test mail server
+		compile "javax.mail:javax.mail-api:$javaxMailVersion"
+		compile "com.sun.mail:javax.mail:$javaxMailVersion"
+
+		testCompile 'org.springframework.boot:spring-boot-starter-test'
+	}
+
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.filesplit.Application'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.filesplit.Application'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+}
+
+project('dynamic-tcp-client') {
+	description = 'Dynamic TCP Client'
+
+	apply plugin: 'spring-boot'
+
+	dependencies {
+		compile 'org.springframework.boot:spring-boot-starter-integration'
+		compile "org.springframework.integration:spring-integration-ip:$springIntegrationVersion"
+		compile "org.springframework.integration:spring-integration-java-dsl:$springIntegrationDslVersion"
+
+		testCompile 'org.springframework.boot:spring-boot-starter-test'
+	}
+
+	springBoot {
+		mainClass = 'org.springframework.integration.samples.dynamictcp.DynamicTcpClientApplication'
+	}
+
+	task run(type: JavaExec) {
+		main 'org.springframework.integration.samples.dynamictcp.DynamicTcpClientApplication'
+		classpath = sourceSets.main.runtimeClasspath
+	}
+}
+
+
+sonarqube {
+	properties {
 		property "sonar.jacoco.reportPath", "${buildDir.name}/jacoco.exec"
 		property "sonar.links.homepage", linkHomepage
 		property "sonar.links.ci", linkCi
@@ -1272,10 +1435,4 @@ sonarRunner {
 		property "sonar.links.scm_dev", linkScmDevConnection
 		property "sonar.java.coveragePlugin", "jacoco"
 	}
-}
-
-task wrapper(type: Wrapper) {
-	description = 'Generates gradlew[.bat] scripts'
-	gradleVersion = '2.5'
-	distributionUrl = "http://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
